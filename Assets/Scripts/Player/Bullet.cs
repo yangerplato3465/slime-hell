@@ -9,7 +9,8 @@ public class Bullet : MonoBehaviour {
     void OnCollisionEnter2D(Collision2D other){
         switch(other.gameObject.tag) {
             case WALL:
-                Destroy(gameObject);
+                // Destroy(gameObject);
+                gameObject.SetActive(false);
                 break;
             
             case ENEMY:

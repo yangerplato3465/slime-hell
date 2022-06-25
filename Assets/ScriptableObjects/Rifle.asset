@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee41952e96338284fa9ce33f34375013, type: 3}
+  m_Name: Rifle
+  m_EditorClassIdentifier: 
+  gunName: Rifle
+  description: Trusty Rifle
+  bulletDamage: 20
+  bulletNumber: 1
+  fireRate: 3
+  bulletSpeed: 15
+  firePoint: {x: 0.594, y: 0.049}
+  gunSprite: {fileID: 6523266799087341046, guid: 2583498d052fc584796a81265532947f, type: 3}

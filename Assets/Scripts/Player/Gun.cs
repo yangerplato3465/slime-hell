@@ -2,35 +2,33 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(ObjectPool))]
 public class Gun : MonoBehaviour {
 
-    [System.Serializable]
-    public class Pool {
-        public string key;
-        public GameObject prefab;
-        public int size;
-    }
 
-    [Header("Gun stats")]
-    public float bulletForce = 20f;
-    public float fireRate = 3f;
-    public float damage = 50f;
+    [Header("Scriptable Object")]
+    public GunSO gun;
 
     [Header("others")]
     public Transform player;
     public Transform firePoint;
+    public SpriteRenderer gunSprite;
     public GameObject bulletPrefab;
     public bool canShoot = true;
     public Camera cam;
     public Rigidbody2D rb;
-    public List<Pool> pools;
-    public Dictionary<string, Queue<GameObject>> poolDictionary;
-
-    private float followSpeed = 10f;
+    public int bulletPoolSize;
+    private ObjectPool bulletPool;
+    private float followSpeed = 20f;
     private Vector2 mousePos;
 
+    private void Awake() {
+        gunSprite.sprite = gun.gunSprite;
+        bulletPool = GetComponent<ObjectPool>();
+    }
+
     private void Start() {
-        poolDictionary = new Dictionary<string, Queue<GameObject>>();
+        bulletPool.InitPools(bulletPrefab, bulletPoolSize);
     }
 
     void Update() {
@@ -53,9 +51,14 @@ public class Gun : MonoBehaviour {
 
     private void Shoot() {
         if(!canShoot) return;
-        GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+        Vector2 lookDir = (mousePos - rb.position);
+        lookDir.Normalize();
+        GameObject bullet = bulletPool.CreateObject();
         Rigidbody2D bulletRb = bullet.GetComponent<Rigidbody2D>();
-        bulletRb.AddForce(firePoint.right * bulletForce, ForceMode2D.Impulse);
+        bullet.transform.position = firePoint.position;
+        bullet.transform.localRotation = transform.rotation;
+        bulletRb.velocity = lookDir * gun.bulletSpeed;
+        
         canShoot = false;
         StartCoroutine(StartCountdown());
     }
@@ -63,7 +66,7 @@ public class Gun : MonoBehaviour {
     public IEnumerator StartCountdown() {
         float currCountdownValue = 1f;
         while (currCountdownValue > 0) {
-            yield return new WaitForSeconds(1 / fireRate);
+            yield return new WaitForSeconds(1 / gun.fireRate);
             currCountdownValue--;
         }
         canShoot = true;

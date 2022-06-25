@@ -6,6 +6,9 @@ public class Player : MonoBehaviour {
 
     [Header("Player stats")]
     public float moveSpeed = 5f;
+    public float rollSpeed = 20f;
+    public float rollTime = 0.4f;
+    public float rollCoolDown = 0.2f;
     public float health = 100;
 
     [Header("Other")]
@@ -24,25 +27,39 @@ public class Player : MonoBehaviour {
 
     void Update() {
         CheckInput();
+        // Debug.Log("player: " + playerState);
         switch(playerState) {
             case PlayerStates.idle:
-                // animator.SetBool("IsRolling", false);
                 animator.SetFloat("Speed", 0);
                 break;
 
             case PlayerStates.run:
-                // animator.SetBool("IsRolling", false);
                 animator.SetFloat("Speed", movement.sqrMagnitude);
                 if(movement.x > 0) transform.localScale = new Vector3(1, 1, 1);
                 else if(movement.x < 0) transform.localScale = new Vector3(-1, 1, 1);
                 break;
 
-            // case PlayerStates.roll:
-            //     DodgeRoll();
-            //     // if (animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerRoll")) {
-            //     //     isRolling = false;
-            //     // }
-            //     break;
+            case PlayerStates.roll:
+                StartCoroutine(DodgeRoll());
+                break;
+
+            case PlayerStates.death:
+                break;
+        }
+    }
+
+    private void FixedUpdate() {
+        switch(playerState) {
+            case PlayerStates.idle:
+                rb.velocity = movement * moveSpeed;
+                break;
+
+            case PlayerStates.run:
+                rb.velocity = movement * moveSpeed;
+                break;
+                
+            case PlayerStates.roll:
+                break;
 
             case PlayerStates.death:
                 break;
@@ -60,17 +77,21 @@ public class Player : MonoBehaviour {
         if((movement.x != 0 || movement.y != 0) && !isRolling) {
             playerState = PlayerStates.run;
         }
-        // if (Input.GetButtonDown("Fire2") || Input.GetButtonDown("Space")) {
-        //     playerState = PlayerStates.roll;
-        // }
+        if ((Input.GetButtonDown("Fire2") || Input.GetButtonDown("Space")) && !isRolling && movement != new Vector2(0, 0)) {
+            playerState = PlayerStates.roll;
+        }
     }
 
-    private void FixedUpdate() {
-        rb.MovePosition(rb.position + movement * moveSpeed * Time.fixedDeltaTime);
-    }
 
-    // private void DodgeRoll() {
-    //     isRolling = true;
-    //     animator.SetBool("IsRolling", true);
-    // }
+    private IEnumerator DodgeRoll() {
+        if (isRolling) yield break;
+        isRolling = true;
+        animator.SetBool("IsRolling", true);
+        
+        rb.velocity = movement * rollSpeed;
+        yield return new WaitForSeconds(rollTime);
+        animator.SetBool("IsRolling", false);
+        yield return new WaitForSeconds(rollCoolDown);
+        isRolling = false;
+    }
 }
