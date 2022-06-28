@@ -1,13 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(ObjectPool))]
 public class Gun : MonoBehaviour {
 
 
     [Header("Scriptable Object")]
-    public GunSO gun;
+    public GunSO gunSO;
 
     [Header("others")]
     public Transform player;
@@ -18,12 +19,21 @@ public class Gun : MonoBehaviour {
     public Camera cam;
     public Rigidbody2D rb;
     public int bulletPoolSize;
+    public Image reloadTimer;
     private ObjectPool bulletPool;
     private float followSpeed = 20f;
     private Vector2 mousePos;
+    private int magSize;
+    private int currentAmmo;
+    private float fireRate;
+    private float bulletSpeed;
+    public float bulletDamage;
+    private float bulletNumberPerShot;
+    private float reloadTime;
+    private bool isReloading = false;
 
     private void Awake() {
-        gunSprite.sprite = gun.gunSprite;
+        InitGun();
         bulletPool = GetComponent<ObjectPool>();
     }
 
@@ -36,10 +46,25 @@ public class Gun : MonoBehaviour {
         transform.position = Vector2.MoveTowards(transform.position, playerPos, followSpeed * Time.deltaTime);
 
         mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
-
+        if (isReloading) return;
+        if (currentAmmo <= 0) {
+            StartCoroutine(Reload());
+            return;
+        }
         if (Input.GetButton("Fire1")) {
             Shoot();
         }
+    }
+
+    private void InitGun() {
+        gunSprite.sprite = gunSO.gunSprite;
+        magSize = gunSO.magSize;
+        fireRate = gunSO.fireRate;
+        bulletSpeed = gunSO.bulletSpeed;
+        bulletNumberPerShot = gunSO.bulletNumberPerShot;
+        bulletDamage = gunSO.bulletDamage;
+        reloadTime = gunSO.reloadTime;
+        currentAmmo = magSize;
     }
 
     void FixedUpdate() {
@@ -57,18 +82,25 @@ public class Gun : MonoBehaviour {
         Rigidbody2D bulletRb = bullet.GetComponent<Rigidbody2D>();
         bullet.transform.position = firePoint.position;
         bullet.transform.localRotation = transform.rotation;
-        bulletRb.velocity = lookDir * gun.bulletSpeed;
+        bulletRb.velocity = lookDir * bulletSpeed;
         
         canShoot = false;
+        currentAmmo--;
         StartCoroutine(StartCountdown());
     }
 
     public IEnumerator StartCountdown() {
-        float currCountdownValue = 1f;
-        while (currCountdownValue > 0) {
-            yield return new WaitForSeconds(1 / gun.fireRate);
-            currCountdownValue--;
-        }
+        yield return new WaitForSeconds(1 / fireRate);
         canShoot = true;
+    }
+
+    public IEnumerator Reload() {
+        canShoot = false;
+        isReloading = true;
+        Debug.Log("REloading");
+        yield return new WaitForSeconds(reloadTime);
+        currentAmmo = magSize;
+        canShoot = true;
+        isReloading = false;
     }
 }

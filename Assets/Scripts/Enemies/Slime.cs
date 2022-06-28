@@ -6,7 +6,6 @@ public class Slime : MonoBehaviour {
 
     [Header("Slime stats")]
     public float health = 100f;
-    public float damage = 10f; 
 
     void Update() {
         if(health <= 0) {
@@ -16,7 +15,8 @@ public class Slime : MonoBehaviour {
 
     private void OnCollisionEnter2D(Collision2D other) {
         if (other.gameObject.tag == "Bullet") {
-            health -= 50f;
+            float bulletDamage = other.gameObject.GetComponent<Bullet>().damage;
+            health -= bulletDamage;
         }
     }
 }

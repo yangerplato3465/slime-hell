@@ -14,9 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gunName: Shotgun
   description: Trusty shotgun
+  magSize: 4
   bulletDamage: 20
-  bulletNumber: 1
+  bulletNumberPerShot: 5
   fireRate: 3
-  bulletSpeed: 1
+  bulletSpeed: 10
+  reloadTime: 2
   firePoint: {x: 0.594, y: 0.049}
   gunSprite: {fileID: 21300000, guid: 4b65a000c0a5fcd4f84b269cba930aa6, type: 3}
